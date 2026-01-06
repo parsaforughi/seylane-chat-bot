@@ -9,7 +9,7 @@
     "dev:all": "npm run dev & cd client && npm run dev",
     "build": "tsc",
     "build:all": "npm run build && cd client && npm run build",
-    "start": "node dist/index.js",
+    "start": "node dist/server/index.js",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
