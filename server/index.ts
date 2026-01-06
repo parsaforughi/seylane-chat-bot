@@ -3,6 +3,8 @@ import session from 'express-session';
 import passport from 'passport';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import ConnectPgSimple from 'connect-pg-simple';
 import { Pool } from '@neondatabase/serverless';
 import authRoutes from './routes/auth.routes.js';
@@ -11,6 +13,9 @@ import webhookRoutes from './routes/webhook.routes.js';
 
 // Load environment variables
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -90,6 +95,35 @@ app.get('/', (req, res) => {
   });
 });
 
+// Serve static files from Next.js build in production
+if (process.env.NODE_ENV === 'production') {
+  const clientOutPath = path.join(__dirname, '../../client/out');
+  
+  console.log('📦 Serving frontend from:', clientOutPath);
+  
+  // Serve static files
+  app.use(express.static(clientOutPath));
+  
+  // Serve Next.js app for all non-API routes
+  app.get('*', (req, res, next) => {
+    // Skip API, auth, and webhook routes
+    if (req.path.startsWith('/api') || 
+        req.path.startsWith('/auth') || 
+        req.path.startsWith('/webhook') ||
+        req.path.startsWith('/health')) {
+      return next();
+    }
+    
+    // Serve index.html for all other routes (SPA routing)
+    res.sendFile(path.join(clientOutPath, 'index.html'), (err) => {
+      if (err) {
+        console.error('Error serving index.html:', err);
+        res.status(500).send('Error loading application');
+      }
+    });
+  });
+}
+
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err);
@@ -103,6 +137,9 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API available at http://localhost:${PORT}`);
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`🎨 Dashboard available at http://localhost:${PORT}`);
+  }
   console.log(`💬 Ready to receive Instagram messages!`);
 });
 

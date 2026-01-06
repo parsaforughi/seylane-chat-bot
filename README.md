@@ -34,17 +34,33 @@ An intelligent Instagram chatbot powered by GPT that understands natural languag
 
 ```bash
 # Install dependencies
-npm install
+npm run setup
 
 # Set up environment variables
-cp .env.example .env
+./create-env.sh
 # Edit .env with your credentials
 
-# Push database schema
-npm run db:push
+# Start development (backend + dashboard)
+npm run dev:all
 
-# Start development server
-npm run dev
+# Or start separately:
+npm run dev          # Backend only
+npm run dev:client   # Dashboard only
+```
+
+## Production Build & Deploy
+
+```bash
+# Build everything (backend + frontend)
+npm run build
+
+# Start production server (serves both on one URL)
+npm start
+
+# Access at: http://localhost:3000
+# - Dashboard: http://localhost:3000
+# - API: http://localhost:3000/api
+# - Webhook: http://localhost:3000/webhook
 ```
 
 ## Environment Variables
