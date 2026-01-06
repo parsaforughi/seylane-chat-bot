@@ -95,34 +95,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Serve static files from Next.js build in production
-if (process.env.NODE_ENV === 'production') {
-  const clientOutPath = path.join(__dirname, '../../client/out');
-  
-  console.log('📦 Serving frontend from:', clientOutPath);
-  
-  // Serve static files
-  app.use(express.static(clientOutPath));
-  
-  // Serve Next.js app for all non-API routes
-  app.get('*', (req, res, next) => {
-    // Skip API, auth, and webhook routes
-    if (req.path.startsWith('/api') || 
-        req.path.startsWith('/auth') || 
-        req.path.startsWith('/webhook') ||
-        req.path.startsWith('/health')) {
-      return next();
-    }
-    
-    // Serve index.html for all other routes (SPA routing)
-    res.sendFile(path.join(clientOutPath, 'index.html'), (err) => {
-      if (err) {
-        console.error('Error serving index.html:', err);
-        res.status(500).send('Error loading application');
-      }
-    });
-  });
-}
+// Note: In production, Next.js runs as a separate process on port 5000
+// Railway/Render will handle routing between services
+// For local production testing, run both: npm run start:server & npm run start:client
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -134,12 +109,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Backend Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 API available at http://localhost:${PORT}`);
-  if (process.env.NODE_ENV === 'production') {
-    console.log(`🎨 Dashboard available at http://localhost:${PORT}`);
-  }
+  console.log(`🎨 Dashboard runs on port 5000 (separate Next.js server)`);
   console.log(`💬 Ready to receive Instagram messages!`);
 });
 
